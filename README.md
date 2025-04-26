@@ -27,4 +27,4 @@ Waveform Visualization: Displays the recorded audio as a waveform.
 Technology Stack:
 
 C# .NET Framework: The primary programming language and development platform.
-NAudio: A .NET audio library used for handling audio input and output.1
+NAudio: A .NET audio library used for handling audio input and output.

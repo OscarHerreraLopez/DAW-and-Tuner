@@ -100,7 +100,7 @@ namespace Test_Tuner
         private float calculatedFrequency = 0;
        
         private float smoothedFrequency = 0;
-        private const float SmoothingFactor = 0.35f; // Adjusted value for smoothing
+        private const float SmoothingFactor = 0.35f;
         private float ApplySmoothing(float currentFrequency)
         {
             if (smoothedFrequency == 0)
@@ -116,15 +116,14 @@ namespace Test_Tuner
 
 
         private const float SmoothingFactorFast = 0.80f;
-        private Queue<float> recentFrequencies = new Queue<float>(10); // Updated size
+        private Queue<float> recentFrequencies = new Queue<float>(10); 
         private const int StableFrequencyCount = 5;
         private const float StabilityToleranceFast = 2.0f;
         const int FFT_LENGTH = 4096;
-        //
         private string _stableNote = "";
         private int _stableNoteCounter = 0;
-        private const int _stableNoteThreshold = 1; // Requires the same note for 3 ticks
-        private double _currentCentsDifference = 0; // Keep track of the latest cents
+        private const int _stableNoteThreshold = 1; 
+        private double _currentCentsDifference = 0; 
 
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -138,11 +137,9 @@ namespace Test_Tuner
                 {
                     // Convert byte buffer to float buffer for frequency calculation
                     float[] floatBufferForFrequency = ConvertByteToFloat(byteBuffer);
-                    //
-                    
                     float calculatedFrequencyRaw = CalculateFrequency(floatBufferForFrequency, waveIn.WaveFormat.SampleRate);
                     float calculatedFrequencySmoothed = calculatedFrequencyRaw > 0 ? ApplySmoothing(calculatedFrequencyRaw, SmoothingFactorFast) : 0;
-                    //
+                    
 
                     // Convert byte buffer to short buffer for waveform data
                     short[] sampleBuffer = new short[bytesRead / 2];
@@ -155,13 +152,13 @@ namespace Test_Tuner
                     if (calculatedFrequencySmoothed > 0)
                     {
                         recentFrequencies.Enqueue(calculatedFrequencySmoothed);
-                        if (recentFrequencies.Count > 10) // Use Capacity
+                        if (recentFrequencies.Count > 10) 
                         {
                             recentFrequencies.Dequeue();
                         }
 
-                        float currentSmoothedFrequency = recentFrequencies.Average(); // Use the averaged frequency
-                        var noteOctave = GetNoteAndOctave(currentSmoothedFrequency); // Use the smoothed frequency for note/octave
+                        float currentSmoothedFrequency = recentFrequencies.Average(); 
+                        var noteOctave = GetNoteAndOctave(currentSmoothedFrequency);
                         string noteName = noteOctave.Item1;
                         int octave = noteOctave.Item2;
                         string fullNoteName = noteName + octave.ToString();
@@ -188,7 +185,7 @@ namespace Test_Tuner
                             BeginInvoke((MethodInvoker)delegate
                             {
                                 frequencyLabel.Text = $"Frequency: {currentSmoothedFrequency:F2} Hz";
-                                noteLabel.Text = $"Note: {fullNoteName}"; // Directly display the detected note
+                                noteLabel.Text = $"Note: {fullNoteName}"; 
                                 meterPanel.Invalidate();
                                 waveformPanel.Invalidate();
                             });
@@ -230,7 +227,7 @@ namespace Test_Tuner
             for (int i = 0; i < buffer.Length / 2; i++)
             {
                 short sample = (short)(buffer[i * 2] | (buffer[i * 2 + 1] << 8));
-                floatBuffer[i] = sample / 32768f; // Normalize to -1.0 to 1.0
+                floatBuffer[i] = sample / 32768f;
             }
             return floatBuffer;
         }
@@ -313,8 +310,8 @@ namespace Test_Tuner
                 }
             }
 
-            // Aggressive Thresholding: Only consider peaks above a fraction of the best magnitude
-            float threshold = bestMagnitude * 0.6f; // Adjust this threshold (e.g., 0.5f, 0.7f)
+            
+            float threshold = bestMagnitude * 0.6f; 
             bestMagnitude = 0;
             bestIndex = 0;
             for (int i = minIndex; i < maxIndex; i++)
@@ -495,7 +492,7 @@ namespace Test_Tuner
             int n = Array.IndexOf(noteNames, noteBase);
             if (n == -1) return 0;
 
-            int a4NoteNumber = 9; // A is the 9th note (0-indexed)
+            int a4NoteNumber = 9; // A is the 9th note
             int a4Octave = 4;
             double frequency = 440.0 * Math.Pow(2, (octave - a4Octave + (double)(n - a4NoteNumber) / 12.0));
             return (float)frequency;
@@ -504,6 +501,7 @@ namespace Test_Tuner
         private void MeterPanel_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+
             int middleX = meterPanel.Width / 2;
             int meterWidth = 100;
             int needleWidth = 10;
@@ -524,7 +522,7 @@ namespace Test_Tuner
                 int markX = middleX + (int)(i * 1.5);
                 if (i == 0)
                 {
-                    g.DrawLine(Pens.Black, markX, meterY, markX, meterY + 35); // Center line
+                    g.DrawLine(Pens.Black, markX, meterY, markX, meterY + 35);
                 }
                 else
                 {
@@ -593,35 +591,19 @@ namespace Test_Tuner
             if (frequency <= 0) return -1;
 
             double semitonesFromC0 = 12 * Math.Log(frequency / c0Frequency, 2);
-            // The octave number for C0 is 0, so we adjust accordingly
+            
             return (int)Math.Round(semitonesFromC0 / 12.0);
         }
-        
-        
+
+
         private void UpdateTunerUI(double cents)
         {
             _needlePosition = cents * 1.5;
-            Debug.WriteLine($"_needlePosition: {_needlePosition}");
 
-            if (cents > 5)
-            {
-                // Indicate sharp
-                Debug.WriteLine($"Sharp: +{cents:F2} cents");
-                // Update UI to show sharp
-            }
-            else if (cents < -5)
-            {
-                // Indicate flat
-                Debug.WriteLine($"Flat: {cents:F2} cents");
-                // Update UI to show flat
-            }
-            else
-            {
-                // Indicate in tune
-                Debug.WriteLine("In Tune");
-                // Update UI to show in tune
-            }
         }
+
+        private Brush _needleColor = Brushes.Gray;
+        private string _tuningStatus = "";
 
         private void ResetTunerUI()
         {
@@ -652,10 +634,11 @@ namespace Test_Tuner
                         for (int i = 0; i < pointsToDraw; i++)
                         {
                             int sampleIndex = (int)(i * xIncrement);
+                            
                             // Ensure sampleIndex is within bounds
                             sampleIndex = Math.Min(sampleIndex, numSamples - 1);
 
-                            int y = (int)(yOffset - lastWaveformData[sampleIndex] * yScale * 10); // Adjust scaling
+                            int y = (int)(yOffset - lastWaveformData[sampleIndex] * yScale * 10); 
                             y = Math.Max(0, Math.Min(waveformPanel.Height - 1, y));
                             points[i] = new Point(i, y);
                         }
@@ -679,7 +662,7 @@ namespace Test_Tuner
             int noteNumber = (int)Math.Round(semitonesFromC0);
             int noteIndex = noteNumber % 12;
 
-            // Handle negative index from modulo
+            // Handle negative index from module
             if (noteIndex < 0)
             {
                 noteIndex += 12;
